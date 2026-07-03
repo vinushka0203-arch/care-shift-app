@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+
+# 環境変数・秘密情報
+.env
+.env.*
+!.env.example
+
+# DB
+*.sqlite3
+*.db
+
+# エディタ・OS
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+
+# 削除退避フォルダ
+_trash/
+
+# 学習用資料(公開リポジトリに含めない)
+*.pptx
