@@ -67,3 +67,30 @@ def test_user(setup_database) -> User:
     db.refresh(user)
     db.close()
     return user
+
+
+@pytest.fixture
+def admin_user(setup_database) -> User:
+    """管理者権限のテスト用ユーザーを1人作成する。"""
+    db = TestingSessionLocal()
+    user = User(
+        name="管理花子",
+        email="admin@example.com",
+        password_hash=hash_password("adminpass123"),
+        role="admin",
+        employment_type="full_time",
+        is_active=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    db.close()
+    return user
+
+
+def login_headers(client, email: str, password: str) -> dict[str, str]:
+    """ログインして Authorization ヘッダを組み立てるテスト用ヘルパー。"""
+    response = client.post("/api/auth/login", json={"email": email, "password": password})
+    assert response.status_code == 200, f"テスト用ログインに失敗: {response.text}"
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}

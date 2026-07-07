@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from './client'
 import type { User } from '../types/user'
 
@@ -17,4 +18,13 @@ export function login(email: string, password: string): Promise<LoginResponse> {
 /** 自分の情報を取得する。 */
 export function getCurrentUser(): Promise<User> {
   return apiFetch<User>('/api/users/me')
+}
+
+/** ログイン中ユーザーの取得クエリ(キャッシュは画面間で共有される)。 */
+export function useCurrentUser() {
+  return useQuery({
+    queryKey: ['currentUser'],
+    queryFn: getCurrentUser,
+    retry: false,
+  })
 }

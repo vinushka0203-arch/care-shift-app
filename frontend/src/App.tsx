@@ -2,7 +2,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { LoginPage } from './pages/LoginPage'
 import { HomePage } from './pages/HomePage'
+import { UsersPage } from './pages/UsersPage'
+import { ShiftTypesPage } from './pages/ShiftTypesPage'
+import { Layout } from './components/Layout'
 import { RequireAuth } from './components/RequireAuth'
+import { RequireAdmin } from './components/RequireAdmin'
 
 const queryClient = new QueryClient()
 
@@ -13,13 +17,30 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route
-            path="/"
             element={
               <RequireAuth>
-                <HomePage />
+                <Layout />
               </RequireAuth>
             }
-          />
+          >
+            <Route path="/" element={<HomePage />} />
+            <Route
+              path="/users"
+              element={
+                <RequireAdmin>
+                  <UsersPage />
+                </RequireAdmin>
+              }
+            />
+            <Route
+              path="/shift-types"
+              element={
+                <RequireAdmin>
+                  <ShiftTypesPage />
+                </RequireAdmin>
+              }
+            />
+          </Route>
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
