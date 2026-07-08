@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-07-08 M4: 希望休・希望勤務の提出と承認の実装
+
+### 何をしたか
+- shift_requests テーブル(user_id, work_date, shift_type_id(null可), request_type, status, note)を追加
+- API: 提出(POST)、一覧(GET: 職員=自分の分/管理者=全員分)、承認/却下(PATCH, admin)
+- フロント: 「希望」ページ(職員=提出フォーム+自分の履歴、管理者=月別一覧+承認/却下ボタン)
+- シフト表のセル右上に希望マーカー(▲ 黄=審査中/緑=承認済み)をオーバーレイ表示
+- テスト 26件 → 36件
+
+### なぜその実装にしたか
+- **希望はステータス管理(pending→accepted/rejected)**: 提出を直接シフトに反映せず「申請→承認」の2段階にすることで、管理者の裁量を残しつつ職員に結果が伝わる。承認済みでもシフト自体は管理者が別途組む(希望はあくまで参考情報)
+- **同一 API を role で出し分け**: GET /api/shift-requests は職員なら自分の分だけ、管理者なら全員分。エンドポイントを分けずに認可ロジックで絞る方が、フロントも同じ関数を使い回せる
+- **同一日の pending 重複は 409**: 二重申請を防ぐ。却下された日への再申請は許す(状態を条件に含めた)
+- **month_range を app/core/dates.py に切り出し**: shifts と shift_requests の両ルーターで使うため共通化(重複コードの解消)
+- **user_name をレスポンスに同梱**: 管理者の一覧表示で職員名が必要だが、職員一覧 API は admin 専用かつ追加リクエストになるため、JOIN して名前だけ載せた
+
+### 学んだこと
+- SQLAlchemy の `db.query(ShiftRequest, User.name).join(...)` で「モデル+特定カラム」のタプルが取れる(N+1 クエリの回避)
+- 条件付き必須(勤務希望のときだけ区分必須)は Pydantic の model_validator で表現できる(M2 の時刻必須と同じパターンの再利用)
+- TanStack Query の queryKey を配列で階層化しておくと(['shiftRequests', year, month])、`invalidateQueries({queryKey: ['shiftRequests']})` で前方一致的に一括無効化できる
+
+---
+
 ## 2026-07-08 M3: 月間シフト表(作成・編集・閲覧)の実装
 
 ### 何をしたか

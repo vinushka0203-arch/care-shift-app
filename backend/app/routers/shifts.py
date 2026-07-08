@@ -1,10 +1,9 @@
 """シフト(割り当て)に関するエンドポイント。"""
-from datetime import date
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.dates import month_range
 from app.core.deps import get_current_admin, get_current_user
 from app.models.shift import Shift
 from app.models.shift_type import ShiftType
@@ -20,13 +19,6 @@ from app.schemas.shift import (
 router = APIRouter(prefix="/api/shifts", tags=["shifts"])
 
 
-def _month_range(year: int, month: int) -> tuple[date, date]:
-    """[月初, 翌月初) の半開区間を返す。"""
-    start = date(year, month, 1)
-    end = date(year + 1, 1, 1) if month == 12 else date(year, month + 1, 1)
-    return start, end
-
-
 @router.get("", response_model=MonthlyShiftsResponse)
 def get_monthly_shifts(
     year: int = Query(ge=2000, le=2100),
@@ -35,7 +27,7 @@ def get_monthly_shifts(
     _user: User = Depends(get_current_user),
 ) -> MonthlyShiftsResponse:
     """指定月のシフトと、表の行になる有効な職員の一覧を返す(認証済みなら誰でも)。"""
-    start, end = _month_range(year, month)
+    start, end = month_range(year, month)
 
     users = (
         db.query(User)

@@ -52,6 +52,9 @@ export function Layout() {
             <NavLink to="/" end className={navLinkClass}>
               シフト表
             </NavLink>
+            <NavLink to="/requests" className={navLinkClass}>
+              希望
+            </NavLink>
             {user.role === 'admin' && (
               <>
                 <NavLink to="/users" className={navLinkClass}>

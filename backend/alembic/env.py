@@ -13,6 +13,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 from app.core.config import settings  # noqa: E402
 from app.core.database import Base  # noqa: E402
 from app.models.shift import Shift  # noqa: E402  (Base.metadata に登録するため import)
+from app.models.shift_request import ShiftRequest  # noqa: E402  (Base.metadata に登録するため import)
 from app.models.shift_type import ShiftType  # noqa: E402  (Base.metadata に登録するため import)
 from app.models.user import User  # noqa: E402  (Base.metadata に登録するため import)
 

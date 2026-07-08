@@ -4,6 +4,7 @@
 各テストの前後でテーブルを作り直すことで独立性を保つ。
 """
 import sys
+from datetime import time
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -16,6 +17,7 @@ from sqlalchemy.orm import sessionmaker
 from app.core.database import Base, get_db
 from app.core.security import hash_password
 from app.main import app
+from app.models.shift_type import ShiftType
 from app.models.user import User
 
 TEST_DATABASE_URL = "sqlite:///./test.db"
@@ -86,6 +88,30 @@ def admin_user(setup_database) -> User:
     db.refresh(user)
     db.close()
     return user
+
+
+@pytest.fixture
+def day_shift_type(setup_database) -> int:
+    """テスト用の勤務区分(日勤)を1件作成し、id を返す。
+
+    DB へ直接挿入するため、Pydantic を介さず Python の time 型で渡す。
+    """
+    db = TestingSessionLocal()
+    shift_type = ShiftType(
+        name="日勤",
+        short_label="日",
+        start_time=time(9, 0),
+        end_time=time(18, 0),
+        color="#3b82f6",
+        is_work=True,
+        sort_order=1,
+    )
+    db.add(shift_type)
+    db.commit()
+    db.refresh(shift_type)
+    type_id = shift_type.id
+    db.close()
+    return type_id
 
 
 def login_headers(client, email: str, password: str) -> dict[str, str]:

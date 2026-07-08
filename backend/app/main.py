@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import auth, shift_types, shifts, users
+from app.routers import auth, shift_requests, shift_types, shifts, users
 
 app = FastAPI(title="介護施設シフト管理アプリ API")
 
@@ -19,6 +19,7 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(shift_types.router)
 app.include_router(shifts.router)
+app.include_router(shift_requests.router)
 
 
 @app.get("/")

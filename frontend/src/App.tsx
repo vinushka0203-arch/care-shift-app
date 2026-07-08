@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { LoginPage } from './pages/LoginPage'
 import { ShiftsPage } from './pages/ShiftsPage'
+import { RequestsPage } from './pages/RequestsPage'
 import { UsersPage } from './pages/UsersPage'
 import { ShiftTypesPage } from './pages/ShiftTypesPage'
 import { Layout } from './components/Layout'
@@ -24,6 +25,7 @@ function App() {
             }
           >
             <Route path="/" element={<ShiftsPage />} />
+            <Route path="/requests" element={<RequestsPage />} />
             <Route
               path="/users"
               element={

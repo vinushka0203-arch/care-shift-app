@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getMonthlyShifts, saveShifts } from '../api/shifts'
+import { listShiftRequests } from '../api/shiftRequests'
 import { listShiftTypes } from '../api/shiftTypes'
 import { useCurrentUser } from '../api/auth'
 import { ApiError } from '../api/client'
 import type { ShiftBulkItem } from '../types/shift'
+import type { ShiftRequest } from '../types/shiftRequest'
 
 const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'] as const
 
@@ -36,6 +38,11 @@ export function ShiftsPage() {
     queryKey: ['shiftTypes'],
     queryFn: listShiftTypes,
   })
+  // 希望のオーバーレイ表示用(職員は自分の分、管理者は全員分が返る)
+  const { data: requests } = useQuery({
+    queryKey: ['shiftRequests', year, month],
+    queryFn: () => listShiftRequests(year, month),
+  })
 
   const daysInMonth = new Date(year, month, 0).getDate()
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
@@ -45,6 +52,26 @@ export function ShiftsPage() {
 
   // サーバー保存済みの割り当て
   const baseline = new Map(monthly?.shifts.map((s) => [`${s.user_id}:${s.work_date}`, s.shift_type_id]))
+
+  // セルごとの希望(却下は表示しない。審査中を承認より優先して表示)
+  const requestByCell = new Map<string, ShiftRequest>()
+  requests?.forEach((request) => {
+    if (request.status === 'rejected') return
+    const key = `${request.user_id}:${request.work_date}`
+    const existing = requestByCell.get(key)
+    if (!existing || (existing.status !== 'pending' && request.status === 'pending')) {
+      requestByCell.set(key, request)
+    }
+  })
+
+  const requestTitle = (request: ShiftRequest): string => {
+    const typeLabel =
+      request.request_type === 'day_off'
+        ? '休み希望'
+        : `勤務希望(${(request.shift_type_id !== null && typeById.get(request.shift_type_id)?.name) || '?'})`
+    const statusLabel = request.status === 'pending' ? '審査中' : '承認済み'
+    return `${request.user_name}: ${typeLabel}(${statusLabel})`
+  }
 
   const cellValue = (key: string): number | null =>
     key in edits ? edits[key] : (baseline.get(key) ?? null)
@@ -228,16 +255,27 @@ export function ShiftsPage() {
                   const shiftType = value !== null ? typeById.get(value) : undefined
                   const isEdited = key in edits
                   const weekday = new Date(year, month - 1, day).getDay()
+                  const cellRequest = requestByCell.get(key)
                   return (
                     <td
                       key={day}
                       onClick={() => handleCellClick(user.id, dateStr)}
-                      className={`h-9 min-w-9 border-b px-0.5 text-center ${
+                      title={cellRequest ? requestTitle(cellRequest) : undefined}
+                      className={`relative h-9 min-w-9 border-b px-0.5 text-center ${
                         weekday === 0 ? 'bg-red-50/50' : weekday === 6 ? 'bg-blue-50/50' : ''
                       } ${isAdmin && selectedTypeId !== null ? 'cursor-pointer hover:outline hover:outline-2 hover:-outline-offset-2 hover:outline-blue-400' : ''} ${
                         isEdited ? 'outline outline-2 -outline-offset-2 outline-amber-400' : ''
                       }`}
                     >
+                      {cellRequest && (
+                        <span
+                          className={`pointer-events-none absolute right-0 top-0 h-0 w-0 border-l-[7px] border-l-transparent border-t-[7px] ${
+                            cellRequest.status === 'pending'
+                              ? 'border-t-amber-400'
+                              : 'border-t-green-500'
+                          }`}
+                        />
+                      )}
                       {shiftType && (
                         <span
                           className="inline-block w-7 rounded py-0.5 text-xs font-medium text-white"

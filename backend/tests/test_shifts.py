@@ -1,32 +1,11 @@
-"""シフト API(月次取得・一括保存)のテスト。"""
-from datetime import time
+"""シフト API(月次取得・一括保存)のテスト。
 
-import pytest
+day_shift_type フィクスチャは conftest.py で定義している。
+"""
+from datetime import time
 
 from app.models.shift_type import ShiftType
 from tests.conftest import TestingSessionLocal, login_headers
-
-
-@pytest.fixture
-def day_shift_type(setup_database) -> int:
-    """テスト用の勤務区分(日勤)を1件作成し、id を返す。"""
-    db = TestingSessionLocal()
-    # DB へ直接挿入するため、Pydantic を介さず Python の time 型で渡す
-    shift_type = ShiftType(
-        name="日勤",
-        short_label="日",
-        start_time=time(9, 0),
-        end_time=time(18, 0),
-        color="#3b82f6",
-        is_work=True,
-        sort_order=1,
-    )
-    db.add(shift_type)
-    db.commit()
-    db.refresh(shift_type)
-    type_id = shift_type.id
-    db.close()
-    return type_id
 
 
 def bulk_item(user_id: int, work_date: str, shift_type_id: int | None) -> dict:
