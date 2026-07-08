@@ -50,7 +50,7 @@ export function Layout() {
           <h1 className="text-lg font-bold text-gray-800">介護施設シフト管理</h1>
           <nav className="flex gap-1">
             <NavLink to="/" end className={navLinkClass}>
-              トップ
+              シフト表
             </NavLink>
             {user.role === 'admin' && (
               <>
