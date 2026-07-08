@@ -1,6 +1,10 @@
 # 介護施設シフト管理アプリ
 
-介護施設向けのシフト管理アプリです。管理者が職員のシフトを手動で作成・編集し、職員はシフトの閲覧や希望休・希望勤務の提出を行えます。バックエンドは FastAPI + SQLAlchemy + Alembic(開発 DB は SQLite、本番は PostgreSQL)、フロントエンドは React(TypeScript) + Vite + Tailwind CSS + TanStack Query + React Router で構成されています。詳細な設計は `docs/design.md` を参照してください。
+介護施設向けのシフト管理アプリです。管理者が職員のシフトを手動で作成・編集し、職員はシフトの閲覧や希望休・希望勤務の提出を行えます。バックエンドは FastAPI + SQLAlchemy + Alembic(開発 DB は SQLite、本番は PostgreSQL)、フロントエンドは React(TypeScript) + Vite + Tailwind CSS + TanStack Query + React Router で構成されています。
+
+- 設計書: `docs/design.md`
+- 学習ログ(実装・設計判断の記録): `docs/learning-log.md`
+- デプロイ手順(Neon + Render + Vercel): `docs/deploy.md`
 
 ## バックエンドの起動手順(PowerShell)
 

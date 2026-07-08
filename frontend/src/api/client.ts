@@ -1,5 +1,6 @@
 /** API 通信の共通設定と fetch ラッパー。 */
-const BASE_URL = 'http://localhost:8000'
+// 本番(Vercel)では VITE_API_BASE_URL に Render の URL を設定する。未設定ならローカル開発用
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
 const TOKEN_KEY = 'access_token'
 
