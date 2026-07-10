@@ -4,6 +4,27 @@
 
 ---
 
+## 2026-07-10 M5(完了): Neon + Render + Vercel へのデプロイ — MVP 完成
+
+### 何をしたか
+- Neon に PostgreSQL を作成し、ローカルから Alembic マイグレーションと初期データ(管理者・勤務区分)を投入
+- Render に FastAPI をデプロイ(無料枠、起動コマンドでマイグレーション自動適用)
+- Vercel に React をデプロイ(VITE_API_BASE_URL で本番 API を指定)
+- 公開 URL: https://care-shift-app-liard.vercel.app / API: https://care-shift-app.onrender.com
+
+### つまずいたポイントと解決(実践的な学び)
+1. **`Could not parse SQLAlchemy URL`**: Render の環境変数 DATABASE_URL の貼り付けミス(引用符・空白の混入)。環境変数の値は「引用符なし・1行」が原則
+2. **環境変数の設定漏れ**: SECRET_KEY と CORS_ORIGINS が未設定のまま一度デプロイされていた。SECRET_KEY 未設定はコード内の開発用初期値(公開リポジトリに載っている)が使われるため、トークン偽造につながる重大な穴。「動いている=正しく設定されている」ではない
+3. **CORS の 400 Disallowed CORS origin**: フロントの URL が許可リストに入っていないとブラウザからのリクエストだけが失敗する(curl 等の直接アクセスは成功するので気づきにくい)。プリフライト(OPTIONS + Origin ヘッダ)で切り分けできる
+4. **Render 無料枠のコールドスタート**: スリープ復帰に1分以上かかることがあり、ヘルスチェックはリトライ前提で書く
+
+### 学んだこと
+- SQLite で開発してきたマイグレーションが PostgreSQL にそのまま適用できた(SQLAlchemy + Alembic の抽象化の恩恵)
+- デプロイの検証は「ヘルスチェック → 認証 → CORS プリフライト」の順に外側から確認すると切り分けやすい
+- 本番のシークレット(DB接続文字列・SECRET_KEY・管理者パスワード)は Git に含めず、環境変数とパスワード管理で扱う
+
+---
+
 ## 2026-07-08 M5(準備): デプロイに向けた PostgreSQL 対応と環境変数化
 
 ### 何をしたか
